@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAYASAN PERTOLONGAN — Pembayaran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EAF3FC;
+    --panel: #FFFFFF;
+    --ink: #1C2B3A;
+    --ink-soft: #5B7085;
+    --blue: #118EEA;
+    --blue-deep: #0C6FBD;
+    --blue-soft: #E8F3FD;
+    --line: #DCE7F3;
+    --shadow: 0 1px 2px rgba(17,52,80,0.05), 0 10px 26px rgba(17,52,80,0.08);
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height:100vh;
+  }
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 18px;
+  }
+  .card{
+    width:100%;
+    max-width: 420px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 40px 30px 26px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:5px;
+    background: linear-gradient(90deg, var(--blue), var(--blue-deep));
+  }
+  h1{
+    font-family:'Source Serif 4', serif;
+    font-weight:700;
+    font-size: 1.7rem;
+    line-height:1.25;
+    letter-spacing: 0.2px;
+    margin: 6px 0 6px;
+    color: var(--ink);
+  }
+  .tagline{
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0 0 30px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+  }
+  .opt-btn{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    width:100%;
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: #FBFAF7;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    font-size: 0.98rem;
+    font-weight:600;
+    color: var(--ink);
+    text-align:left;
+    transition: border-color .15s ease, background .15s ease, transform .12s ease;
+  }
+  .opt-btn:hover{
+    border-color: var(--blue);
+    background: #F3F6F3;
+    transform: translateY(-1px);
+  }
+  .opt-btn:focus-visible{
+    outline: 2px solid var(--blue-deep);
+    outline-offset: 2px;
+  }
+  .opt-icon{
+    width: 38px; height:38px;
+    flex: 0 0 38px;
+    border-radius: 10px;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--blue);
+    color:#fff;
+  }
+  .opt-icon.dana{
+    background: linear-gradient(160deg, #17A2F5 0%, var(--blue) 55%, var(--blue-deep) 100%);
+    border-radius: 50%;
+  }
+  .opt-text small{
+    display:block;
+    font-weight:400;
+    color: var(--ink-soft);
+    font-size: 0.78rem;
+    margin-top: 2px;
+  }
+
+  /* Payment detail views */
+  .pay-view{ display:none; }
+  .pay-view.active{ display:block; }
+  .back-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:none;
+    border:none;
+    color: var(--ink-soft);
+    font-family:'Inter',sans-serif;
+    font-size: 0.85rem;
+    cursor:pointer;
+    padding: 4px 2px;
+    margin-bottom: 18px;
+  }
+  .back-btn:hover{ color: var(--ink); }
+
+  .qr-wrap{
+    background: #FBFAF7;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    margin: 4px 0 18px;
+  }
+  .qr-wrap img{
+    width: 100%;
+    max-width: 260px;
+    display:block;
+    margin: 0 auto;
+    border-radius: 8px;
+    background:#fff;
+  }
+  .qr-placeholder{
+    width:100%;
+    max-width:260px;
+    aspect-ratio:1/1;
+    margin:0 auto;
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: var(--ink-soft);
+    font-size:0.78rem;
+    padding: 16px;
+    background:#fff;
+  }
+  .merchant-name{
+    font-weight:600;
+    font-size: 0.95rem;
+    margin-top: 14px;
+  }
+  .merchant-sub{
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .dana-box{
+    background: #FBFAF7;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 20px;
+    margin: 4px 0 18px;
+  }
+  .dana-label{
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .dana-number{
+    font-family:'Source Serif 4', serif;
+    font-size: 1.5rem;
+    font-weight:600;
+    letter-spacing: 0.5px;
+    color: var(--ink);
+    word-break: break-all;
+  }
+  .dana-owner{
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+  .copy-btn{
+    margin-top: 16px;
+    border: 1px solid var(--blue);
+    background: #fff;
+    color: var(--blue-deep);
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size: 0.85rem;
+    padding: 9px 18px;
+    border-radius: 10px;
+    cursor:pointer;
+    transition: background .15s ease;
+  }
+  .copy-btn:hover{ background: #F1F5F2; }
+  .copy-btn.copied{
+    border-color: var(--blue-deep);
+    color: var(--blue-deep);
+  }
+
+  .note{
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    line-height:1.5;
+    margin: 0;
+  }
+
+  footer{
+    margin-top: 26px;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.2px;
+  }
+
+  .comment-link-btn{
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: none;
+    background: none;
+    color: var(--ink-soft);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.82rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .comment-link-btn:hover{ color: var(--blue-deep); }
+
+  .comment-form{
+    display: flex;
+    margin-top: 4px;
+    gap: 10px;
+    flex-direction: column;
+  }
+  .comment-form input,
+  .comment-form textarea{
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: #FBFAF7;
+    resize: vertical;
+  }
+  .comment-form textarea{ min-height: 72px; }
+  .comment-form input:focus,
+  .comment-form textarea:focus{
+    outline: none;
+    border-color: var(--blue);
+  }
+  .comment-submit-btn{
+    align-self: flex-end;
+    padding: 9px 18px;
+    border-radius: 10px;
+    border: none;
+    background: var(--blue-deep);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity .15s ease;
+  }
+  .comment-submit-btn:hover{ opacity: 0.9; }
+
+  .comment-list{
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .comment-item{
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #FBFAF7;
+  }
+  .comment-item .cname{
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .comment-item .ctext{
+    font-size: 0.83rem;
+    color: var(--ink);
+    margin-top: 3px;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+  .comment-item .ctime{
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    margin-top: 5px;
+  }
+  .comment-empty{
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-top: 12px;
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- HOME: pilihan metode -->
+    <div id="view-home" class="pay-view active">
+      <h1>YAYASAN&nbsp;PERTOLONGAN</h1>
+      <p class="tagline">Silakan pilih metode pembayaran</p>
+
+      <div class="options">
+        <button class="opt-btn" onclick="showView('qris')">
+          <span class="opt-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="white" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="white" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="white" stroke-width="1.6"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z" fill="white"/></svg>
+          </span>
+          <span class="opt-text">
+            Bayar dengan QRIS
+            <small>Pindai kode dengan e-wallet atau m-banking</small>
+          </span>
+        </button>
+
+        <button class="opt-btn" onclick="showView('dana')">
+          <span class="opt-icon dana">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <text x="12" y="17" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="700" fill="white">$</text>
+            </svg>
+          </span>
+          <span class="opt-text">
+            Bayar menggunakan DANA
+            <small>Transfer langsung ke nomor DANA</small>
+          </span>
+        </button>
+      </div>
+
+      <button class="comment-link-btn" onclick="showView('komentar')">Tinggalkan komentar</button>
+    </div>
+
+    <!-- QRIS VIEW -->
+    <div id="view-qris" class="pay-view">
+      <button class="back-btn" onclick="showView('home')">&larr; Kembali</button>
+      <h1 style="font-size:1.25rem;">Bayar dengan QRIS</h1>
+
+      <div class="qr-wrap">
+        <img src="qris.png" alt="QRIS Yayasan Pertolongan">
+
+        <div class="merchant-name">YAYASAN PERTOLONGAN</div>
+        <div class="merchant-sub">NMID: ID1026504700091A01</div>
+      </div>
+
+      <p class="note">Pindai kode QRIS di atas menggunakan aplikasi bank atau e‑wallet apa pun (DANA, GoPay, OVO, m‑banking, dll).</p>
+    </div>
+
+    <!-- DANA VIEW -->
+    <div id="view-dana" class="pay-view">
+      <button class="back-btn" onclick="showView('home')">&larr; Kembali</button>
+      <h1 style="font-size:1.25rem;">Bayar menggunakan DANA</h1>
+
+      <div class="dana-box">
+        <div class="dana-label">Nomor DANA</div>
+        <div class="dana-number" id="danaNumber" data-raw="083862489117">0838-6248-9117</div>
+        <div class="dana-owner">a.n. EHSA JAMXXX MAXXXX</div>
+        <button class="copy-btn" id="copyBtn" onclick="copyNumber()">Salin nomor</button>
+      </div>
+
+      <p class="note">Buka aplikasi DANA, pilih Transfer, lalu masukkan nomor di atas untuk mengirim pembayaran.</p>
+    </div>
+
+    <!-- KOMENTAR VIEW -->
+    <div id="view-komentar" class="pay-view">
+      <button class="back-btn" onclick="showView('home')">&larr; Kembali</button>
+      <h1 style="font-size:1.25rem;">Komentar</h1>
+
+      <div class="comment-form active">
+        <input type="text" id="commentName" placeholder="Nama Anda" maxlength="40">
+        <textarea id="commentText" placeholder="Tulis komentar Anda di sini..." maxlength="300"></textarea>
+        <button class="comment-submit-btn" onclick="submitComment()">Kirim</button>
+      </div>
+
+      <div class="comment-list" id="commentList"></div>
+      <p class="comment-empty" id="commentEmpty">Belum ada komentar. Jadilah yang pertama menulis.</p>
+    </div>
+
+    <footer>Terima kasih atas dukungan dan pertolongannya🙏🏻</footer>
+
+  </div>
+
+<script>
+  function showView(name){
+    document.querySelectorAll('.pay-view').forEach(el => el.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+  }
+
+  // --- Komentar ---
+  const NEGATIVE_WORDS = [
+    'anjing','anjir','bangsat','bajingan','kontol','memek','goblok','tolol','bodoh',
+    'tai','sialan','kampret','babi','jancok','jancuk','asu','idiot','bego','sampah',
+    'penipu','tipu','scam','bohong','curang','busuk','laknat','setan','keparat',
+    'brengsek','pantek','anjay','ngentot','jelek','buruk','hina','sial','fuck',
+    'shit','bitch','asshole','stupid','idiot','sucks','scammer','fraud','fake'
+  ];
+
+  function containsNegative(text){
+    const lower = text.toLowerCase();
+    return NEGATIVE_WORDS.some(word => lower.includes(word));
+  }
+
+  function toggleCommentForm(){
+    document.getElementById('commentForm').classList.toggle('active');
+  }
+
+  function loadComments(){
+    const raw = localStorage.getItem('yp_comments');
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  function saveComments(list){
+    localStorage.setItem('yp_comments', JSON.stringify(list));
+  }
+
+  function renderComments(){
+    const list = loadComments();
+    const container = document.getElementById('commentList');
+    const empty = document.getElementById('commentEmpty');
+    container.innerHTML = '';
+
+    if(list.length === 0){
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    list.slice().reverse().forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'comment-item';
+      const nameEl = document.createElement('div');
+      nameEl.className = 'cname';
+      nameEl.textContent = c.name;
+      const textEl = document.createElement('div');
+      textEl.className = 'ctext';
+      textEl.textContent = c.text;
+      const timeEl = document.createElement('div');
+      timeEl.className = 'ctime';
+      timeEl.textContent = c.time;
+      item.appendChild(nameEl);
+      item.appendChild(textEl);
+      item.appendChild(timeEl);
+      container.appendChild(item);
+    });
+  }
+
+  function submitComment(){
+    const nameInput = document.getElementById('commentName');
+    const textInput = document.getElementById('commentText');
+
+    const name = nameInput.value.trim() || 'Anonim';
+    const text = textInput.value.trim();
+
+    if(!text){
+      return;
+    }
+
+    // Komentar negatif ditolak secara diam-diam, tanpa pesan peringatan
+    if(!containsNegative(text)){
+      const list = loadComments();
+      list.push({
+        name: name,
+        text: text,
+        time: new Date().toLocaleString('id-ID', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+      });
+      saveComments(list);
+    }
+
+    nameInput.value = '';
+    textInput.value = '';
+    renderComments();
+  }
+
+  renderComments();
+
+  function copyNumber(){
+    const el = document.getElementById('danaNumber');
+    const num = el.getAttribute('data-raw') || el.textContent.trim();
+    const btn = document.getElementById('copyBtn');
+    navigator.clipboard.writeText(num).then(() => {
+      btn.textContent = 'Tersalin ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Salin nomor';
+        btn.classList.remove('copied');
+      }, 1800);
+    }).catch(() => {
+      btn.textContent = 'Gagal menyalin';
+    });
+  }
+</script>
+
+</body>
+</html>
